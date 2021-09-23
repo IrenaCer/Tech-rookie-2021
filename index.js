@@ -3,9 +3,16 @@ const taskForm = document.getElementById("taskForm");
 const taskInput = document.getElementById("taskInput");
 const taskList = document.getElementById("taskList");
 
-const taskListStateJSON = localStorage.getItem("taskListState");
-const taskListState =
-  taskListStateJSON !== null ? JSON.parse(taskListStateJSON) : {};
+const readStorage = () => {
+  const taskListStateJSON = localStorage.getItem("taskListState");
+  return taskListStateJSON !== null ? JSON.parse(taskListStateJSON) : {};
+};
+
+const updateStorage = () => {
+  localStorage.setItem("taskListState", JSON.stringify({ tasks, ids }));
+};
+
+const taskListState = readStorage();
 const tasks = taskListState.tasks || {};
 let ids = taskListState.ids || [];
 
@@ -16,7 +23,7 @@ taskForm.addEventListener("submit", (e) => {
   tasks[id] = { completed: false, value: taskInput.value };
   taskInput.value = "";
 
-  localStorage.setItem("taskListState", JSON.stringify({ tasks, ids }));
+  updateStorage();
 
   render();
 });
@@ -32,7 +39,7 @@ const render = () => {
         <input data-status-id="${id}" type="checkbox" ${
       task.completed ? "checked" : ""
     }/>
-        <span class="text">{text}</span>
+        <span class="text"></span>
         <button data-remove-id="${id}">Remove</button>
     `;
 
@@ -48,8 +55,8 @@ document.addEventListener("change", (e) => {
   const id = e.target.getAttribute("data-status-id");
   if (id) {
     tasks[id].completed = !tasks[id].completed;
-    localStorage.setItem("taskListState", JSON.stringify({ tasks, ids }));
 
+    updateStorage();
     render();
   }
 });
@@ -59,7 +66,8 @@ document.addEventListener("click", (e) => {
   if (id) {
     delete tasks[id];
     ids = ids.filter((cur) => cur !== id);
-    localStorage.setItem("taskListState", JSON.stringify({ tasks, ids }));
+
+    updateStorage();
     render();
   }
 });
